@@ -1,0 +1,113 @@
+<template>
+  <div>
+    <el-input disabled :value="$route.query.roleName" />
+    <el-tree
+      ref="tree"
+      style="margin: 20px 0"
+      :data="allPermissions"
+      node-key="id"
+      show-checkbox
+      default-expand-all
+      :props="defaultProps"
+    />
+    <el-button :loading="loading" type="primary" @click="save">保存</el-button>
+    <el-button @click="$router.replace({ name: 'Role' })">取消</el-button>
+  </div>
+</template>
+<script>
+export default {
+  name: 'RoleAuth',
+
+  data() {
+    return {
+      loading: false, // 用来标识是否正在保存请求中的标识, 防止重复提交
+      allPermissions: [], // 所有权限
+      defaultProps: {
+        children: 'children',
+        label: 'name',
+      },
+    }
+  },
+
+  created() {
+    this.init()
+  },
+
+  methods: {
+    /*
+      初始化
+      */
+    init() {
+      const roleId = this.$route.params.id
+      this.getPermissions(roleId)
+    },
+
+    /*
+      获取指定角色的权限列表
+      */
+    getPermissions(roleId) {
+      this.$API.permission.toAssign(roleId).then((result) => {
+        const allPermissions = result.data.children
+        // 保存所有权限
+        this.allPermissions = allPermissions
+        // 获取所有权限中被选中的权限
+        const checkedIds = this.getCheckedIds(allPermissions)
+        // 设置为选中状态
+        this.$refs.tree.setCheckedKeys(checkedIds)
+      })
+    },
+
+    /*
+      得到所有选中的id列表
+      */
+    getCheckedIds(auths, initArr = []) {
+      return auths.reduce((pre, item) => {
+        // 被选中且level为4，说明就是最小层级了
+        if (item.select && item.level === 4) {
+          pre.push(item.id)
+        } else if (item.children) {
+          // 如果有孩子，就可以继续使用此方法去获取最小层级被选中的id数据
+          this.getCheckedIds(item.children, initArr)
+        }
+        return pre
+      }, initArr)
+    },
+
+    /*
+      保存权限列表
+      */
+    save() {
+      var ids = this.$refs.tree.getCheckedKeys().join(',')
+      /*
+        vue elementUI tree树形控件获取父节点ID的实例
+        修改源码:
+        情况1: element-ui没有实现按需引入打包,
+          node_modules\element-ui\lib\element-ui.common.js    25382行修改源码  去掉 'includeHalfChecked &&'
+          // if ((child.checked || includeHalfChecked && child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
+          if ((child.checked || child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
+        情况2: element-ui实现了按需引入打包
+          node_modules\element-ui\lib\tree.js    1051行修改源码  去掉 'includeHalfChecked &&'
+          // if ((child.checked || includeHalfChecked && child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
+          if ((child.checked || child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
+        */
+      this.loading = true
+      this.$API.permission
+        .doAssign(this.$route.params.id, ids)
+        .then((result) => {
+          this.loading = false
+          this.$message.success(result.$message || '分配权限成功')
+          // 必须在跳转前获取(跳转后通过this获取不到正确的数据了)--当前用户的角色名称
+          const roleName = this.$route.query.roleName
+          // 全部角色列表数据
+          const roles = this.$store.getters.roles
+          this.$router.replace('/acl/role/list', () => {
+            // 跳转成功后, 判断如果更新的是当前用户对应角色的权限, 重新加载页面以获得最新的数据
+            if (roles.includes(roleName)) {
+              window.location.reload()
+            }
+          })
+        })
+    },
+  },
+}
+</script>
