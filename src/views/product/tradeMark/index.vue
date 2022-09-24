@@ -109,6 +109,7 @@
           </el-upload>
         </el-form-item>
       </el-form>
+      <!-- 按钮区 -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="addOrUpdateTradeMark"

@@ -7,12 +7,12 @@ module.exports = {
    * @type {boolean} true | false
    * @description Whether fix the header
    */
-  // 表头是否固定
-  fixedHeader: false,
+  // topheader中表头是否固定
+  fixedHeader: true,
 
   /**
    * @type {boolean} true | false
-   * @description Whether show the logo in sidebar
+   * @description 侧边栏是否展示icon
    */
-  sidebarLogo: false
+  sidebarLogo: true
 }

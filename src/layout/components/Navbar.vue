@@ -1,19 +1,25 @@
 <template>
   <div class="navbar">
+    <!-- 折叠区 -->
     <hamburger
       :is-active="sidebar.opened"
       class="hamburger-container"
       @toggleClick="toggleSideBar"
     />
-
+    <!-- 面包屑 -->
     <breadcrumb class="breadcrumb-container" />
-
+    <!-- 用户头像 -->
     <div class="right-menu">
+      <!-- 下拉框 -->
       <el-dropdown class="avatar-container" trigger="click">
+        <!-- 用户头像 -->
         <div class="avatar-wrapper">
-          <img :src="avatar + '?imageView2/1/w/80/h/80'" class="user-avatar" />
+          <!-- <img :src="avatar + '?imageView2/1/w/80/h/80'" class="user-avatar"> -->
+          <img :src="avatar" class="user-avatar" />
+
           <i class="el-icon-caret-bottom" />
         </div>
+        <!-- 退出和用户名 -->
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item style="font-weight: 600">{{
@@ -43,14 +49,15 @@ export default {
     ...mapGetters(['sidebar', 'avatar']),
     // 获取用户名
     username() {
-      return localStorage.getItem('TOKEN')
+      return localStorage.getItem('username')
     },
   },
   methods: {
+    // 切换折叠效果
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
-    // 退出登录
+    // 退出登录：发请求跳转路由
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)

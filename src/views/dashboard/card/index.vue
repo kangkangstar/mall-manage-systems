@@ -1,8 +1,8 @@
 <template>
   <el-row :gutter="10" style="margin-top: 10px">
+    <!-- 第一个card -->
     <el-col :span="6">
       <el-card>
-        <!-- 第一个card -->
         <Detail title="总销售额" :count="listState.salesTotal">
           <template slot="charts">
             <span
@@ -150,9 +150,9 @@
         </Detail>
       </el-card>
     </el-col>
+    <!-- 第2个card -->
     <el-col :span="6">
       <el-card>
-        <!-- 第2个card -->
         <Detail title="访问量" :count="listState.visitTotal">
           <template slot="charts">
             <lineChart
@@ -166,9 +166,9 @@
         </Detail>
       </el-card>
     </el-col>
+    <!-- 第3个card -->
     <el-col :span="6">
       <el-card>
-        <!-- 第3个card -->
         <Detail title="支付笔数" :count="listState.payTotal">
           <template slot="charts">
             <barChart
@@ -182,9 +182,9 @@
         </Detail>
       </el-card>
     </el-col>
+    <!-- 第4个card -->
     <el-col :span="6">
       <el-card>
-        <!-- 第4个card -->
         <Detail title="运营活动效果" :count="listState.activityRate">
           <template slot="charts">
             <progressChart
@@ -237,7 +237,9 @@
 </template>
 
 <script>
+// 每个card的模板
 import Detail from './Detail'
+// 封装的3个图表
 import lineChart from './lineChart'
 import barChart from './barChart'
 import progressChart from './progressCharts'

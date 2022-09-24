@@ -2,14 +2,6 @@
 // 登录退出相关的接口
 import request from '@/utils/request'
 
-// 登录接口
-// export function login(data) {
-//   return request({
-//     url: '/admin/acl/index/login',
-//     method: 'post',
-//     data
-//   })
-// }
 export const login = (data) => request({
   url: '/admin/acl/index/login',
   method: 'post',

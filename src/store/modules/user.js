@@ -23,10 +23,11 @@ const getDefaultState = () => {
     buttons: [],
     // 角色信息
     roles: [],
-    // 【项目中已有的异步路由】和【服务器返回的标记信息】进行对比，最终需要展示的路由
+    // 【项目中已有的异步路由】和【服务器返回的标记信息】进行对比，最终需要展示的异步路由
     resultAsyncRoutes: [],
     // 用户最终需要展示的全部路由
-    resultAllRoutes: []
+    resultAllRoutes: [],
+    ifchange: false
   }
 }
 
@@ -40,11 +41,11 @@ const mutations = {
     // ES6新增的合并对象合法，会清空state
     Object.assign(state, getDefaultState())
   },
-  // 存储token
+  // vuex存储token
   SET_TOKEN: (state, token) => {
     state.token = token
   },
-  // 存储用户名
+  // 存储用户信息
   SET_USERINFO: (state, userInfo) => {
     // 用户名
     state.name = userInfo.name
@@ -60,16 +61,20 @@ const mutations = {
   // 最终计算出来的异步路由
   SET_RESULTASYNCROUTES: (state, asyncRoutes) => {
     // vuex保存当前用户的异步路由，注意一个用户需要展示完成路由：常量，异步，任意路由
+    // 在通过vuex中的state属性存储路由在sessionStorage中，只是存储了左侧菜单栏展示的信息path地址，但是并没有存进去路由详细信息，比如name，meta值
     state.resultAsyncRoutes = asyncRoutes
-    // 计算出当前用户需要展示所有路由,全部连接后再复制给
+    // 计算出当前用户需要展示所有路由:常量+异步+任意路由
     state.resultAllRoutes = constantRoutes.concat(state.resultAsyncRoutes, anyRoutes)
-    // 给路由器添加新的路由
+    // 将计算好的新路由添加到路由器上
     router.addRoutes(state.resultAllRoutes)
+    state.ifchange = true // 走到这步代表获取过路由了
   }
 
 }
 
 // 定义函数：两个数组进行对比，对比出当前用户到底显示哪些异步路由
+// routes[返回的标志：不同的用户应该展示哪些菜单的标记]
+// asyncRoutes 所有的异步路由
 const computedAsyncRoutes = (asyncRoutes, routes) => {
   // 两个数组取交集
   // 过滤出当前用户【超级管理|普通员工】需要展示的异步路由
@@ -86,15 +91,16 @@ const computedAsyncRoutes = (asyncRoutes, routes) => {
 }
 
 const actions = {
-  // 登录业务
+  // 登录业务---后台返回token，做vuex和本地存储
   async login({ commit }, userInfo) {
-    // 解构用户名与密码
+    // 解构用户名与密码——
     const { username, password } = userInfo
     const result = await login({ username: username.trim(), password: password })
     // 注意：当前登录请求使用mock数据，code等于20000代表成功
     if (result.code === 20000) {
-      // 成功提交mutation,持久化存储token
+      // 成功提交mutation,vuex存储
       commit('SET_TOKEN', result.data.token)
+      // 持久化存储token
       setToken(result.data.token)
       return 'ok'
     } else {
@@ -102,22 +108,35 @@ const actions = {
       return Promise.reject(new Error('faile'))
     }
   },
-
-  // 获取用户信息
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        // 获取用户信息：返回的数据包含：用户名name 用户头像 avatar routes[返回的标志：不同的用户应该展示哪些菜单的标记]
-        // roles[用户角色信息] buttons[按钮的信息：按钮权限用户的标记]
-        const { data } = response
-        // vuex存储用户全部的信息
-        commit('SET_USERINFO', data)
-        commit('SET_RESULTASYNCROUTES', computedAsyncRoutes(asyncRoutes, data.routes))
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+  // 再次登录
+  async againlogin({
+    commit
+  }, hebing) {
+    try {
+      if (hebing) {
+        commit('SET_RESULTASYNCROUTES', constantRoutes.concat(asyncRoutes))
+        return hebing
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  // 获取用户信息——这步是最先触发的，获取用户信息后保存起来
+  async getInfo({ commit, state }) {
+    const result = await getInfo(state.token)
+    if (result.code === 20000) {
+      // 获取用户信息：返回的数据包含：用户名name 用户头像 avatar routes[返回的标志：不同的用户应该展示哪些菜单的标记]
+      // roles[用户角色信息] buttons[按钮的信息：按钮权限用户的标记]
+      const { data } = result
+      // vuex存储用户全部的信息
+      commit('SET_USERINFO', data)
+      // 存储路由信息,带着的数据是当前用户应该展示的所有异步路由信息
+      commit('SET_RESULTASYNCROUTES', computedAsyncRoutes(asyncRoutes, data.routes))
+      return 'ok'
+    } else {
+      // 失败
+      return Promise.reject(new Error('faile'))
+    }
   },
 
   // 退出登录
@@ -132,17 +151,6 @@ const actions = {
     } else {
       return Promise.reject(new Error('faile'))
     }
-
-    // return new Promise((resolve, reject) => {
-    //   logout(state.token).then(() => {
-    //     removeToken() // 先移除token
-    //     resetRouter()
-    //     commit('RESET_STATE')
-    //     resolve()
-    //   }).catch(error => {
-    //     reject(error)
-    //   })
-    // })
   },
 
   // 移出token

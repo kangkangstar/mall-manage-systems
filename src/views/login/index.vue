@@ -13,6 +13,7 @@
         <h3 class="title">帐户登录</h3>
       </div>
       <!-- 用户名 -->
+      <!--         :rules="[{ required: true, message: '用户名不能为空' }]" -->
       <el-form-item prop="username">
         <span class="svg-container">
           <!-- 图标 -->
@@ -23,13 +24,15 @@
           v-model="loginForm.username"
           placeholder="用户名"
           name="username"
-          type="text"
           tabindex="1"
           auto-complete="on"
         />
       </el-form-item>
       <!-- 密码 -->
-      <el-form-item prop="password">
+      <el-form-item
+        prop="password"
+        :rules="[{ required: true, message: '密码不能为空' }]"
+      >
         <span class="svg-container">
           <!-- 图标 -->
           <svg-icon icon-class="password" />
@@ -55,15 +58,10 @@
       <el-button
         :loading="loading"
         type="primary"
-        class="loginButton"
         @click.native.prevent="handleLogin"
         >登&nbsp;&nbsp;&nbsp;录</el-button
       >
-
-      <!-- <div class="tips">
-        <span style="margin-right: 20px">username: admin</span>
-        <span> password: any</span>
-      </div> -->
+      <el-button @click="resetForm('loginForm')">重置</el-button>
     </el-form>
   </div>
 </template>
@@ -75,33 +73,26 @@ export default {
   name: 'Login',
   data() {
     // 进行表单验证，验证用户名与密码操作
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('请输入正确的用户名'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码不能少于6位'))
-      } else {
-        callback()
-      }
-    }
+    // 进行表单验证，验证用户名与密码操作
+    // const validateUsername = (rule, value, callback) => {
+    //   if (!validUsername(value)) {
+    //     callback(new Error('请输入正确的用户名'))
+    //   } else {
+    //     callback()
+    //   }
+    // }
+    // const validatePassword = (rule, value, callback) => {
+    //   if (value.length < 6) {
+    //     callback(new Error('密码不能少于6位'))
+    //   } else {
+    //     callback()
+    //   }
+    // }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111',
+        username: '',
+        password: '',
       },
-      // loginRules: {
-      //   username: [
-      //     { required: true, trigger: 'blur', validator: validateUsername },
-      //   ],
-      //   password: [
-      //     { required: true, trigger: 'blur', validator: validatePassword },
-      //   ],
-      // },
       loading: false,
       passwordType: 'password',
       redirect: undefined,
@@ -116,6 +107,9 @@ export default {
     },
   },
   methods: {
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -141,7 +135,7 @@ export default {
               // 登录成功进行路由跳转
               // this.$router.push({ path: this.redirect || '/' })
               this.$router.push('/')
-              localStorage.setItem('TOKEN', this.loginForm.username)
+              localStorage.setItem('username', this.loginForm.username)
               // loading效果结束
               this.loading = false
             })
@@ -149,7 +143,7 @@ export default {
               this.loading = false
             })
         } else {
-          console.log('error submit!!')
+          // console.log('error submit!!')
           return false
         }
       })
@@ -178,6 +172,7 @@ $cursor: #fff;
     display: inline-block;
     height: 47px;
     width: 85%;
+    background: transparent;
 
     input {
       background: transparent;
@@ -200,15 +195,14 @@ $cursor: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    color: #454545;
+    // color: #454545;
   }
 }
 </style>
 
 <style lang="scss" scoped>
-$bg: #2d3a4b;
 $dark_gray: #889aa4;
-$light_gray: #eee;
+$light_gray: #353434;
 
 .login-container {
   min-height: 100%;
@@ -225,30 +219,11 @@ $light_gray: #eee;
     padding: 160px 35px 0;
     margin: 0 auto;
     overflow: hidden;
-
-    .loginButton {
-      width: 100%;
-      margin-bottom: 30px;
-      font-weight: 600;
-      font-size: 20px;
-    }
-  }
-
-  .tips {
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
-
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
   }
 
   .svg-container {
     padding: 6px 5px 6px 15px;
-    color: $dark_gray;
+    // color: $dark_gray; // 修改图标的颜色
     vertical-align: middle;
     width: 30px;
     display: inline-block;

@@ -1,6 +1,5 @@
 <template>
   <div :class="{ 'has-logo': showLogo }">
-    <logo v-if="showLogo" :collapse="isCollapse" />
     <el-scrollbar wrap-class="scrollbar-wrapper">
       <el-menu
         :default-active="activeMenu"
@@ -12,7 +11,7 @@
         :collapse-transition="false"
         mode="vertical"
       >
-        <!-- 模板种遍历菜单栏的时候用的常量路由，需要替换成 -->
+        <!-- 模板中遍历菜单栏的时候用的常量路由，需要替换成 常量+异步+错误路由的合集 -->
         <sidebar-item
           v-for="route in routes"
           :key="route.path"
@@ -26,12 +25,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/styles/variables.scss'
 
 export default {
-  components: { SidebarItem, Logo },
+  components: { SidebarItem },
   computed: {
     ...mapGetters(['sidebar']),
     // 应该替换为vuex中计算好的全部路由
@@ -39,8 +37,8 @@ export default {
       // 这里遍历的是常量路由的数组
       // 需要遍历的应该是仓库计算完毕的全部路由
       return this.$store.state.user.resultAllRoutes
-      // return this.$router.options.routes
     },
+    // 激活的菜单
     activeMenu() {
       const route = this.$route
       const { meta, path } = route
@@ -50,6 +48,7 @@ export default {
       }
       return path
     },
+    // 展示logo
     showLogo() {
       return this.$store.state.settings.sidebarLogo
     },

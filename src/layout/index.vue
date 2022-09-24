@@ -1,11 +1,21 @@
 <template>
+  <!-- 大盒子 -->
   <div :class="classObj" class="app-wrapper">
-    <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
+    <!-- 手机端可以点击空白区域将侧边栏折叠 -->
+    <div
+      v-if="device === 'mobile' && sidebar.opened"
+      class="drawer-bg"
+      @click="handleClickOutside"
+    />
+    <!-- 侧边栏 -->
     <sidebar class="sidebar-container" />
+    <!-- 版心 -->
     <div class="main-container">
-      <div :class="{'fixed-header':fixedHeader}">
+      <!-- 顶部 -->
+      <div :class="{ 'fixed-header': fixedHeader }">
         <navbar />
       </div>
+      <!-- 展示区 -->
       <app-main />
     </div>
   </div>
@@ -20,7 +30,7 @@ export default {
   components: {
     Navbar,
     Sidebar,
-    AppMain
+    AppMain,
   },
   mixins: [ResizeMixin],
   computed: {
@@ -38,56 +48,62 @@ export default {
         hideSidebar: !this.sidebar.opened,
         openSidebar: this.sidebar.opened,
         withoutAnimation: this.sidebar.withoutAnimation,
-        mobile: this.device === 'mobile'
+        mobile: this.device === 'mobile',
       }
-    }
+    },
   },
   methods: {
+    // 关闭sidebar没有动画
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
-  @import "~@/styles/mixin.scss";
-  @import "~@/styles/variables.scss";
+@import '~@/styles/mixin.scss';
+// sidebar颜色配置文件
+@import '~@/styles/variables.scss';
 
-  .app-wrapper {
-    @include clearfix;
-    position: relative;
-    height: 100%;
-    width: 100%;
-    &.mobile.openSidebar{
-      position: fixed;
-      top: 0;
-    }
-  }
-  .drawer-bg {
-    background: #000;
-    opacity: 0.3;
-    width: 100%;
-    top: 0;
-    height: 100%;
-    position: absolute;
-    z-index: 999;
-  }
-
-  .fixed-header {
+// 大盒子
+.app-wrapper {
+  @include clearfix;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  &.mobile.openSidebar {
     position: fixed;
     top: 0;
-    right: 0;
-    z-index: 9;
-    width: calc(100% - #{$sideBarWidth});
-    transition: width 0.28s;
   }
+}
+// 手机端logo
+.drawer-bg {
+  background: #000;
+  opacity: 0.3;
+  width: 100%;
+  top: 0;
+  height: 100%;
+  position: absolute;
+  z-index: 999;
+}
 
-  .hideSidebar .fixed-header {
-    width: calc(100% - 54px)
-  }
+// 顶部header
+.fixed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9;
+  // 宽度动态计算 100%减去侧边栏宽度
+  width: calc(100% - #{$sideBarWidth});
+  transition: width 0.28s;
+}
+// 折叠区距离sidebar距离
+.hideSidebar .fixed-header {
+  width: calc(100% - 54px);
+}
 
-  .mobile .fixed-header {
-    width: 100%;
-  }
+.mobile .fixed-header {
+  width: 100%;
+}
 </style>

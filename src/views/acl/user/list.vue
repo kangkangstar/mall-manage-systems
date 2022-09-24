@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <!-- 头部 -->
+    <!-- 头部 第一行元素 -->
     <el-form inline>
       <!-- 表单元素 行内表单-->
       <el-form-item style="margin-top: 20px">
@@ -29,7 +29,6 @@
         >批量删除</el-button
       >
     </div>
-
     <!-- table表格：展示用户信息的地方 -->
     <el-table
       v-loading="listLoading"
@@ -39,16 +38,12 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-
       <el-table-column type="index" label="序号" width="80" align="center" />
-
       <el-table-column prop="username" label="用户名" width="150" />
       <el-table-column prop="nickName" label="用户昵称" />
       <el-table-column prop="roleName" label="权限列表" />
-
       <el-table-column prop="gmtCreate" label="创建时间" width="180" />
       <el-table-column prop="gmtModified" label="更新时间" width="180" />
-
       <el-table-column label="操作" width="230" align="center">
         <template slot-scope="{ row }">
           <HintButton
@@ -87,7 +82,7 @@
       :current-page="page"
       :total="total"
       :page-size="limit"
-      :page-sizes="[3, 10, 20]"
+      :page-sizes="[5, 10, 20]"
       style="padding: 20px 0; text-align: center"
       layout="prev, pager, next, jumper, ->, sizes, total"
       @current-change="getUsers"
@@ -121,7 +116,6 @@
         >
       </div>
     </el-dialog>
-
     <!-- 分配角色的对话框的结构 -->
     <el-dialog
       title="分配角色"
@@ -188,7 +182,7 @@ export default {
       selectedIds: [], // 所有选择的user的id的数组
       users: [], // 当前页的用户列表
       page: 1, // 当前页码
-      limit: 3, // 每页数量
+      limit: 5, // 每页数量
       total: 0, // 总数量
       user: {}, // 当前要操作的user
       dialogUserVisible: false, // 是否显示用户添加/修改的dialog
@@ -299,11 +293,9 @@ export default {
     */
     async getRoles() {
       const result = await this.$API.user.getRoles(this.user.id)
-      console.log(result, 111111111111)
       const { allRolesList, assignRoles } = result.data
       this.allRoles = allRolesList
       this.userRoleIds = assignRoles.map((item) => item.id)
-
       this.checkAll = allRolesList.length === assignRoles.length
       this.isIndeterminate =
         assignRoles.length > 0 && assignRoles.length < allRolesList.length
@@ -327,23 +319,28 @@ export default {
     请求给用户进行角色授权
     */
     async assignRole() {
+      // 获取用户id
       const userId = this.user.id
+      // 多个角色id之间用 ，连接
       const roleIds = this.userRoleIds.join(',')
+      // 开始loading
       this.loading = true
+      // 发请求更新角色数据
       const result = await this.$API.user.assignRoles(userId, roleIds)
+      // 隐藏loading
       this.loading = false
-      this.$message.success(result.message || '分配角色成功')
+      // 成功通知
+      this.$message.success(result.message)
       // 清空数据，解决快速点击下一个时候出现数据回显，当前用户选中的角色在下一个用户那看到
       this.resetRoleData()
-
-      // console.log(this.$store.getters.name, this.user)
       if (this.$store.getters.name === this.user.username) {
         window.location.reload()
       }
+      this.getUsers()
     },
 
     /*
-    重置用户角色的数据
+    重置用户角色的数据--关闭对话框的时候把数据清空
     */
     resetRoleData() {
       // 关闭对话框

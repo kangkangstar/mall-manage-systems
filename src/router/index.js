@@ -1,6 +1,7 @@
 // 引入 vue | vue-router
 import Vue from 'vue'
 import Router from 'vue-router'
+import list from '@/views/acl/user/list'
 
 // 使用路由插件
 Vue.use(Router)
@@ -16,12 +17,14 @@ import Layout from '@/layout'
 //  不管什么角色，都能看到登录，首页和404路由
 export const constantRoutes = [{
   path: '/login',
+  name: 'Login',
   component: () => import('@/views/login/index'),
   // 不在菜单栏展示
   hidden: true
 },
 {
   path: '/404',
+  name: '404',
   component: () => import('@/views/404'),
   hidden: true
 },
@@ -30,7 +33,7 @@ export const constantRoutes = [{
   component: Layout,
   redirect: '/dashboard',
   children: [{
-    path: 'dashboard',
+    path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/dashboard/index'),
     // 设置在侧边栏展示的文字
@@ -40,23 +43,10 @@ export const constantRoutes = [{
     }
   }]
 }
-  // {
-  //   path: '/product',
-  //   component: Layout,
-  //   name: 'Product',
-  //   meta: { title: '商品管理', icon: 'el-icon-goods' },
-  //   children: [
-  //     {
-  //       path: 'trademark',
-  //       name: 'TradeMark',
-  //       component: () => import('@/views/product/tradeMark'),
-  //       meta: { title: '品牌管理' }
-  //     }
-  //   ]
-  // }
 ]
 // 异步路由：不同的用户(角色)，需要过滤筛选出的路由，称为异步路由
 export const asyncRoutes = [
+  // 用户
   {
     name: 'Acl',
     path: '/acl',
@@ -70,7 +60,8 @@ export const asyncRoutes = [
       {
         name: 'User',
         path: 'user/list',
-        component: () => import('@/views/acl/user/list'),
+        // component: () => import('@/views/acl/user/list'),
+        component: list,
         meta: {
           title: '用户管理'
         }
@@ -103,6 +94,7 @@ export const asyncRoutes = [
       }
     ]
   },
+  // 商品
   {
     path: '/product',
     component: Layout,
@@ -135,34 +127,20 @@ export const asyncRoutes = [
       }
     ]
   }
-  // {
-  //   path: '/test',
-  //   component: Layout,
-  //   name: 'Test',
-  //   meta: { title: '测试管理', icon: 'el-icon-goods' },
-  //   children: [
-  //     {
-  //       path: 'test1',
-  //       name: 'Test1',
-  //       component: () => import('@/views/Test/Test1'),
-  //       meta: { title: '测试管理1' }
-  //     },
-  //     {
-  //       path: 'test2',
-  //       name: 'Test2',
-  //       component: () => import('@/views/Test/Test2'),
-  //       meta: { title: '测试管理2' }
-  //     }
-  //   ]
-  // }
-
 ]
 
-// 当路径出现错误的时候重定向至404
+// 错误路由：当路径出现错误的时候重定向至404
 export const anyRoutes = [
   // 404 页面必须在最后
-  { path: '*', redirect: '/404', hidden: true }
+  { path: '*', name: '404', redirect: '/404', hidden: true }
 ]
+
+// 重置路由
+export function resetRouter() {
+  // 生成新的路由
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher // reset router
+}
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
@@ -174,13 +152,6 @@ const createRouter = () => new Router({
   routes: constantRoutes
 })
 
-// 重置路由
-export function resetRouter() {
-  // 生成新的路由
-  const newRouter = createRouter()
-  router.matcher = newRouter.matcher // reset router
-}
-
 const router = createRouter()
-
 export default router
+

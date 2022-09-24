@@ -8,6 +8,7 @@ import home from './modules/home'
 
 Vue.use(Vuex)
 
+// 分4个小仓库
 const store = new Vuex.Store({
   modules: {
     app,
