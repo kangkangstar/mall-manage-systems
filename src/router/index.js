@@ -132,7 +132,7 @@ export const asyncRoutes = [
 // 错误路由：当路径出现错误的时候重定向至404
 export const anyRoutes = [
   // 404 页面必须在最后
-  { path: '*', name: '404', redirect: '/404', hidden: true }
+  { path: '*', name: '错误页面', redirect: '/404', hidden: true }
 ]
 
 // 重置路由
@@ -153,5 +153,11 @@ const createRouter = () => new Router({
 })
 
 const router = createRouter()
+
+router.selfaddRoutes = function(params) {
+  // params为全部的路由信息
+  router.matcher = new Router().matcher
+  router.addRoutes(params)
+}
 export default router
 

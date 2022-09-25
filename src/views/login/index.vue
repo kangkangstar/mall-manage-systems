@@ -4,7 +4,6 @@
     <el-form
       ref="loginForm"
       :model="loginForm"
-      :rules="loginRules"
       class="login-form"
       auto-complete="on"
       label-position="left"
@@ -14,7 +13,10 @@
       </div>
       <!-- 用户名 -->
       <!--         :rules="[{ required: true, message: '用户名不能为空' }]" -->
-      <el-form-item prop="username">
+      <el-form-item
+        prop="username"
+        :rules="[{ required: true, message: '用户名不能为空' }]"
+      >
         <span class="svg-container">
           <!-- 图标 -->
           <svg-icon icon-class="user" />

@@ -10,26 +10,24 @@ import getPageTitle from '@/utils/get-page-title'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login'] // no redirect whitelist
-// 定义变量判断是否已经动态添加过，如果刷新后load永远为 0
-// let load = 0
-// // 全局路由守卫
-// router.beforeEach((to, from, next) => {
-//   // 4.获取路由菜单
-//   const menuTree = store.state.user.resultAsyncRoutes
-//   // 非登录、有菜单数据、 没有进行添加（或者刷新了）
-//   if (load === 0 && menuTree.length && to.path !== '/login') {
-//     load++
-//     // 再次调用存储菜单数据(前提是在存储的地方有调用添加路由规则)、或者直接调用动态添加路由规则事件
-//     store.dispatch('SET_RESULTASYNCROUTES', menuTree)
-//     // 添加后跳转到应访问的地址
-//     next({ path: to.fullPath })
-//   }
-// })
+// 设置flag，防止非权限路由，页面死循环重定向
+let flag = 0
+
 router.beforeEach(async (to, from, next) => {
   // 1.进度条开始
   NProgress.start()
   // 2.设置网页页签名【有默认值】
   document.title = getPageTitle(to.meta.title)
+  // 在路由跳转前判断是否被添加成功--解决出首页外其他路由浏览器一刷新空白问题
+  if (flag === 0 && to.matched.length === 0) {
+    flag++
+    next({ path: to.path }) // 从哪里来去哪里
+  } else if (flag !== 0 && to.matched.length === 0) {
+    // next({ path: '/' })
+    next(false) // 阻止跳转
+  } else {
+    next()
+  }
   // 3.获取token
   const hasToken = getToken()
   // 判断token是否存在进行路由拦截

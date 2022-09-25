@@ -66,7 +66,7 @@ const mutations = {
     // 计算出当前用户需要展示所有路由:常量+异步+任意路由
     state.resultAllRoutes = constantRoutes.concat(state.resultAsyncRoutes, anyRoutes)
     // 将计算好的新路由添加到路由器上
-    router.addRoutes(state.resultAllRoutes)
+    router.selfaddRoutes(state.resultAllRoutes)
     state.ifchange = true // 走到这步代表获取过路由了
   }
 
@@ -106,19 +106,6 @@ const actions = {
     } else {
       // 失败
       return Promise.reject(new Error('faile'))
-    }
-  },
-  // 再次登录
-  async againlogin({
-    commit
-  }, hebing) {
-    try {
-      if (hebing) {
-        commit('SET_RESULTASYNCROUTES', constantRoutes.concat(asyncRoutes))
-        return hebing
-      }
-    } catch (err) {
-      console.log(err)
     }
   },
   // 获取用户信息——这步是最先触发的，获取用户信息后保存起来
